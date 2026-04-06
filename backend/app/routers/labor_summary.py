@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from backend.models import EmployeeOutputs, EmployeeSkillPrice, Employee
-from backend.database import get_db
+from models import EmployeeOutputs, EmployeeSkillPrice, Employee
+from database import get_db
 
 router = APIRouter()
 

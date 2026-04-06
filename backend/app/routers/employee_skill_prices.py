@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.models import EmployeeSkillPrice
-from backend.app.schemas.employee_skill_price import EmployeeSkillPriceCreate, EmployeeSkillPriceUpdate
-from backend.database import get_db
+from models import EmployeeSkillPrice
+from app.schemas.employee_skill_price import EmployeeSkillPriceCreate, EmployeeSkillPriceUpdate
+from database import get_db
 
 router = APIRouter()
 

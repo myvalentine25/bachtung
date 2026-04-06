@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Float
-from backend.database import Base
+from database import Base
 
 class ProductProcessRequirements(Base):
     __tablename__ = "product_process_requirements"

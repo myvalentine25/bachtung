@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from backend.models import EmployeeOutputs, ProductProcessRequirements, EmployeeSkillPrice
+from models import EmployeeOutputs, ProductProcessRequirements, EmployeeSkillPrice
 
 def calculate_completion(db: Session, employee_id: int, product_id: int, work_date: str):
 	"""Tính % hoàn thành từng công đoạn"""

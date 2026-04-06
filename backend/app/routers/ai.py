@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.app.ai_utils import calculate_completion, calculate_labor_cost, predict_productivity
-from backend.database import get_db
+from app.ai_utils import calculate_completion, calculate_labor_cost, predict_productivity
+from database import get_db
 
 router = APIRouter()
 

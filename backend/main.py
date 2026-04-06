@@ -3,11 +3,11 @@ from datetime import date
 
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.database import Base, SessionLocal, engine
-from backend.models import Product, Employee, EmployeeSkillPrice, EmployeeOutputs
+from database import Base, SessionLocal, engine
+from models import Product, Employee, EmployeeSkillPrice, EmployeeOutputs
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import ai
+from routers import ai
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -41,21 +41,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from backend.app.routers.products import router as products_router
+from app.routers.products import router as products_router
 
 
-from backend.app.routers.employees import router as employees_router
+from app.routers.employees import router as employees_router
 
 
-from backend.app.routers.employee_skill_prices import router as employee_skill_prices_router
+from app.routers.employee_skill_prices import router as employee_skill_prices_router
 
 
 
 
-from backend.app.routers.employee_outputs import router as employee_outputs_router
+from app.routers.employee_outputs import router as employee_outputs_router
 
 
-from backend.app.routers.product_process_requirements import router as product_process_requirements_router
+from app.routers.product_process_requirements import router as product_process_requirements_router
 
 
 app.include_router(products_router, prefix="/products", tags=["Products"])
@@ -75,9 +75,9 @@ app.include_router(employee_outputs_router, prefix="/employee-outputs", tags=["E
 app.include_router(product_process_requirements_router, prefix="/product-process-requirements", tags=["Product Process Requirements"])
 
 
-from backend.app.routers.labor_summary import router as labor_summary_router
+from app.routers.labor_summary import router as labor_summary_router
 app.include_router(labor_summary_router, prefix="/labor-cost-summary", tags=["Labor Cost Summary"])
 
 
-from backend.app.routers.ai import router as ai_router
+from app.routers.ai import router as ai_router
 app.include_router(ai_router, prefix="/ai", tags=["AI"])
