@@ -2,8 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Kết nối PostgreSQL database bach_tung
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://hungleminh@localhost:5432/bach_tung"
+
+# Kết nối Supabase PostgreSQL
+SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:B2chtung123!@db.pdwzypnihufbyrakyyqi.supabase.co:5432/postgres"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
