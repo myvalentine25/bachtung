@@ -1,15 +1,25 @@
 from datetime import date
 
+
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
+from database import Base, SessionLocal, engine
 from models import Product, ProductProcessRequirements, Employee, EmployeeSkillPrice, EmployeeOutputs
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from routers import ai
+from contextlib import asynccontextmanager
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
+@app.get("/")
+def root():
+    return {"status": "ok"}
 
 # Dependency to get DB session
 def get_db():
