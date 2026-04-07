@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 interface LaborCostSummaryRecord {
   employee_id: number;
@@ -11,11 +11,19 @@ interface LaborCostSummaryRecord {
   total_cost: number;
 }
 
+interface SalaryForecastRow {
+  employee_id?: number;
+  employee?: string;
+  avg_daily_salary?: number;
+  forecast_month_salary?: number;
+}
+
 export default function LaborCostSummary() {
-    // AI Salary Forecast State
-    const [forecast, setForecast] = useState<any[] | null>(null);
-    const [forecastLoading, setForecastLoading] = useState(false);
-    const [forecastError, setForecastError] = useState('');
+  // AI Salary Forecast State
+  const [forecast, setForecast] = useState<SalaryForecastRow[] | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(false);
+  const [forecastError, setForecastError] = useState('');
+  const [forecastUnavailable, setForecastUnavailable] = useState(false);
   const [summaryData, setSummaryData] = useState<LaborCostSummaryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -34,13 +42,19 @@ export default function LaborCostSummary() {
     const fetchForecast = async () => {
       setForecastLoading(true);
       setForecastError('');
+      setForecastUnavailable(false);
       try {
         const response = await fetch(`${API_BASE}/api/ai/salary-forecast/all`);
+        if (response.status === 404) {
+          setForecast([]);
+          setForecastUnavailable(true);
+          return;
+        }
         if (!response.ok) throw new Error('Unable to fetch salary forecast');
         const data = await response.json();
-        setForecast(data);
+        setForecast(Array.isArray(data) ? data : []);
       } catch (err: any) {
-        setForecastError('Could not load salary forecast.');
+        setForecastError('Could not load salary forecast right now.');
         setForecast(null);
       } finally {
         setForecastLoading(false);
@@ -204,6 +218,8 @@ export default function LaborCostSummary() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🤖 Total Labor Cost Forecast (All Employees)</h3>
         {forecastLoading ? (
           <div className="text-gray-600">Loading forecast...</div>
+        ) : forecastUnavailable ? (
+          <div className="text-amber-700">Salary forecast is not available in the current backend deployment.</div>
         ) : forecastError ? (
           <div className="text-red-600">{forecastError}</div>
         ) : forecast && forecast.length > 0 ? (
@@ -222,6 +238,8 @@ export default function LaborCostSummary() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🤖 Labor Cost Forecast (AI)</h3>
         {forecastLoading ? (
           <div className="text-gray-600">Loading forecast...</div>
+        ) : forecastUnavailable ? (
+          <div className="text-amber-700">Salary forecast is not available in the current backend deployment.</div>
         ) : forecastError ? (
           <div className="text-red-600">{forecastError}</div>
         ) : forecast && forecast.length > 0 ? (

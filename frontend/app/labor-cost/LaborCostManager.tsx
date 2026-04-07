@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 interface Employee {
   id: number;
@@ -26,6 +26,11 @@ interface LaborOutput {
   staple_output: number;
   product_id: number;
 }
+
+const toNumberOrZero = (value: unknown) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
 
 export default function LaborCostManager() {
   const [outputs, setOutputs] = useState<LaborOutput[]>([]);
@@ -67,7 +72,23 @@ export default function LaborCostManager() {
         throw new Error(`Unable to load outputs (${response.status})`);
       }
       const data = await response.json();
-      setOutputs(data);
+      const normalized = Array.isArray(data)
+        ? data
+            .filter((item) => item && item.id != null)
+            .map((item) => ({
+              ...item,
+              employee_id: item.employee_id ?? 0,
+              product_id: item.product_id ?? 0,
+              work_date: item.work_date ?? '',
+              cut_output: toNumberOrZero(item.cut_output),
+              shave_output: toNumberOrZero(item.shave_output),
+              sharpen_output: toNumberOrZero(item.sharpen_output),
+              paste_output: toNumberOrZero(item.paste_output),
+              press_output: toNumberOrZero(item.press_output),
+              staple_output: toNumberOrZero(item.staple_output)
+            }))
+        : [];
+      setOutputs(normalized);
     } catch (error) {
       console.error('Error fetching outputs:', error);
       setErrorMessage('Could not load labor cost records. Please ensure the backend is running on port 8000.');
@@ -81,7 +102,10 @@ export default function LaborCostManager() {
       const response = await fetch(`${API_BASE}/employees/`);
       if (!response.ok) throw new Error('Unable to load employees');
       const data = await response.json();
-      setEmployees(data);
+      const normalized = Array.isArray(data)
+        ? data.filter((item) => item && item.id != null && typeof item.name === 'string')
+        : [];
+      setEmployees(normalized);
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
@@ -92,7 +116,10 @@ export default function LaborCostManager() {
       const response = await fetch(`${API_BASE}/products/`);
       if (!response.ok) throw new Error('Unable to load products');
       const data = await response.json();
-      setProducts(data);
+      const normalized = Array.isArray(data)
+        ? data.filter((item) => item && item.id != null && typeof item.product_description === 'string')
+        : [];
+      setProducts(normalized);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -119,10 +146,10 @@ export default function LaborCostManager() {
   };
 
   const filteredOutputs = outputs.filter((output) => {
-    if (filterMonth && output.work_date.slice(0, 7) !== filterMonth) {
+    if (filterMonth && (output.work_date ?? '').slice(0, 7) !== filterMonth) {
       return false;
     }
-    if (filterDate && output.work_date !== filterDate) {
+    if (filterDate && (output.work_date ?? '') !== filterDate) {
       return false;
     }
     if (filterEmployee.trim()) {
@@ -232,15 +259,15 @@ export default function LaborCostManager() {
   const handleEdit = (output: LaborOutput) => {
     setEditing(output);
     setForm({
-      employee_id: output.employee_id.toString(),
-      work_date: output.work_date,
-      cut_output: output.cut_output.toString(),
-      shave_output: output.shave_output.toString(),
-      sharpen_output: output.sharpen_output.toString(),
-      paste_output: output.paste_output.toString(),
-      press_output: output.press_output.toString(),
-      staple_output: output.staple_output.toString(),
-      product_id: output.product_id.toString()
+      employee_id: (output.employee_id ?? '').toString(),
+      work_date: output.work_date ?? '',
+      cut_output: (output.cut_output ?? 0).toString(),
+      shave_output: (output.shave_output ?? 0).toString(),
+      sharpen_output: (output.sharpen_output ?? 0).toString(),
+      paste_output: (output.paste_output ?? 0).toString(),
+      press_output: (output.press_output ?? 0).toString(),
+      staple_output: (output.staple_output ?? 0).toString(),
+      product_id: (output.product_id ?? '').toString()
     });
     document.getElementById('labor-cost-form')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -309,7 +336,7 @@ export default function LaborCostManager() {
               >
                 <option value="">Select an employee</option>
                 {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id.toString()}>
+                  <option key={emp.id} value={String(emp.id ?? '')}>
                     {emp.name}
                   </option>
                 ))}
@@ -355,7 +382,7 @@ export default function LaborCostManager() {
               >
                 <option value="">Select a product</option>
                 {products.map((prod) => (
-                  <option key={prod.id} value={prod.id.toString()}>
+                  <option key={prod.id} value={String(prod.id ?? '')}>
                     {prod.product_description}
                   </option>
                 ))}
@@ -521,12 +548,12 @@ export default function LaborCostManager() {
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">{getEmployeeName(output.employee_id)}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{getProductDescription(output.product_id)}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{output.work_date}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{output.cut_output.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{output.shave_output.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{output.sharpen_output.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{output.paste_output.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{output.press_output.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{output.staple_output.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{(output.cut_output ?? 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{(output.shave_output ?? 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{(output.sharpen_output ?? 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{(output.paste_output ?? 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{(output.press_output ?? 0).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{(output.staple_output ?? 0).toFixed(2)}</td>
                     <td className="px-6 py-4 text-sm font-medium space-x-2">
                       <button
                         onClick={() => handleEdit(output)}
