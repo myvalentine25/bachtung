@@ -346,19 +346,20 @@ def get_labor_cost_summary(db: Session = Depends(get_db)):
         
         # Calculate total cost for this output record
         total_cost = (
-            output.cut_output * (skill_price.cut_price or 0) +
-            output.shave_output * (skill_price.shave_price or 0) +
-            output.sharpen_output * (skill_price.sharpen_price or 0) +
-            output.paste_output * (skill_price.paste_price or 0) +
-            output.press_output * (skill_price.press_price or 0) +
-            output.staple_output * (skill_price.staple_price or 0)
+            (output.cut_output or 0) * (skill_price.cut_price or 0) +
+            (output.shave_output or 0) * (skill_price.shave_price or 0) +
+            (output.sharpen_output or 0) * (skill_price.sharpen_price or 0) +
+            (output.paste_output or 0) * (skill_price.paste_price or 0) +
+            (output.press_output or 0) * (skill_price.press_price or 0) +
+            (output.staple_output or 0) * (skill_price.staple_price or 0)
         )
         
         key = (employee_id, month_key)
         if key not in summary_data:
+            emp = employee_dict.get(employee_id)
             summary_data[key] = {
                 'employee_id': employee_id,
-                'employee_name': employee_dict.get(employee_id, {}).name or f"Employee {employee_id}",
+                'employee_name': emp.name if emp else f"Employee {employee_id}",
                 'month': month_key,
                 'total_cost': 0.0
             }
