@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://bachtung-production.up.railway.app';
 
 interface LaborCostSummaryRecord {
   employee_id: number;
@@ -74,7 +74,7 @@ export default function LaborCostSummary() {
       setSummaryData(data);
     } catch (error) {
       console.error('Error fetching summary:', error);
-      setErrorMessage('Could not load labor cost summary. Please ensure the backend is running on port 8000.');
+      setErrorMessage('Could not load labor cost summary. Please ensure the backend is reachable.');
     } finally {
       setLoading(false);
     }
